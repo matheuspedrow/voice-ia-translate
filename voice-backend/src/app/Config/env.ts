@@ -2,7 +2,6 @@
 export const env = {
   port: Number(process.env.PORT) || 3001,
   frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:3000',
-  openaiApiKey: process.env.OPENAI_API_KEY,
   geminiApiKey: process.env.GEMINI_API_KEY,
   openrouterApiKey: process.env.OPENROUTER_API_KEY,
   openrouterApiUrl:

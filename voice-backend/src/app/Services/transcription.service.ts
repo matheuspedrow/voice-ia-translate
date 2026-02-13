@@ -7,7 +7,7 @@ const GEMINI_BASE_URL =
   'https://generativelanguage.googleapis.com/v1beta/models';
 
 const TRANSCRIPTION_ERROR_MESSAGE =
-  'Configure GEMINI_API_KEY ou OPENAI_API_KEY em .env. Gemini: https://aistudio.google.com/apikey | OpenAI: https://platform.openai.com/api-keys';
+  'Configure GEMINI_API_KEY em .env. Gemini: https://aistudio.google.com/apikey';
 
 interface GeminiResponse {
   candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
@@ -17,12 +17,6 @@ interface GeminiResponse {
 @Injectable()
 export class TranscriptionService {
   private readonly openaiClient: OpenAI | null;
-
-  constructor() {
-    this.openaiClient = env.openaiApiKey
-      ? new OpenAI({ apiKey: env.openaiApiKey })
-      : null;
-  }
 
   async transcribe(audioBuffer: Buffer): Promise<string> {
     if (env.geminiApiKey) return this.transcribeWithGemini(audioBuffer);
