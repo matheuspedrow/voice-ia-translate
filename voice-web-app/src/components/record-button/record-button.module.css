@@ -1,0 +1,73 @@
+.button {
+  display: flex;
+  height: 4rem;
+  width: 4rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  transition: all 0.2s;
+}
+
+.button:focus {
+  outline: none;
+}
+
+.button:focus-visible {
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  .button:focus-visible {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.5);
+  }
+}
+
+.buttonIdle {
+  background-color: var(--primary);
+  color: white;
+}
+
+.buttonIdle:hover {
+  background-color: var(--primary-hover);
+}
+
+.buttonIdle:active {
+  transform: scale(0.95);
+}
+
+.buttonRecording {
+  transform: scale(1.1);
+  background-color: var(--recording);
+  color: white;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 10px 15px -3px rgb(239 68 68 / 0.3);
+  }
+  50% {
+    box-shadow: 0 10px 25px -3px rgb(239 68 68 / 0.6), 0 0 0 8px rgb(239 68 68 / 0.1);
+  }
+}
+
+.buttonDisabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.buttonDisabled.buttonIdle:hover {
+  background-color: var(--primary);
+}
+
+.buttonDisabled.buttonIdle:active {
+  transform: none;
+}
+
+.icon {
+  width: 2rem;
+  height: 2rem;
+}
