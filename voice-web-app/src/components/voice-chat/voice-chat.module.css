@@ -61,6 +61,14 @@
   gap: 0.5rem;
 }
 
+.recordingTimer {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--recording);
+  min-width: 3rem;
+}
+
 .processingLabel {
   font-size: 0.875rem;
   color: var(--muted);

@@ -1,3 +1,3 @@
-/** URL base da API - use /api para deploy unificado (Vercel), ou URL externa para backend separado */
+/** URL base da API - /api para Next.js (padrão). Para backend separado: http://localhost:3001/api */
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? '/api';
+  (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '');

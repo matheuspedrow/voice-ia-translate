@@ -5,6 +5,8 @@ import { getErrorMessage, parseApiErrorMessage } from '@/utils';
 /** Tempo máximo de espera da API (60s - transcrição + LLM podem demorar) */
 const REQUEST_TIMEOUT_MS = 60000;
 
+const VOICE_API_PATH = '/api/chat/voice';
+
 export async function sendVoiceMessage(
   audioBlob: Blob,
   history: ConversationMessage[],
@@ -16,8 +18,12 @@ export async function sendVoiceMessage(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
+  const url = API_BASE_URL.startsWith('http')
+    ? `${API_BASE_URL.replace(/\/$/, '')}/chat/voice`
+    : VOICE_API_PATH;
+
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/voice`, {
+    const response = await fetch(url, {
       method: 'POST',
       body: formData,
       signal: controller.signal,

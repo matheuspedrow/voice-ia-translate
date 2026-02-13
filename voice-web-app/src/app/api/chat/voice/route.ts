@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { transcribe } from '../../transcribe';
 import { generateResponse } from '../../llm';
-import {
-  MAX_AUDIO_FILE_SIZE,
-  ALLOWED_AUDIO_MIME_TYPES,
-} from '../../constants';
+import { MIN_RECORDING_SIZE } from '@/constants';
 
 interface ConversationMessage {
   role: 'user' | 'assistant';
@@ -19,26 +16,14 @@ export async function POST(request: NextRequest) {
 
     if (!audioFile) {
       return NextResponse.json(
-        { message: 'Áudio não enviado. Envie o arquivo no campo "audio".' },
+        { message: 'Nenhum áudio recebido. Grave novamente segurando o botão e solte quando terminar.' },
         { status: 400 },
       );
     }
 
-    if (audioFile.size > MAX_AUDIO_FILE_SIZE) {
+    if (audioFile.size < MIN_RECORDING_SIZE) {
       return NextResponse.json(
-        {
-          message: `Arquivo muito grande. Máximo: ${MAX_AUDIO_FILE_SIZE / 1024 / 1024}MB`,
-        },
-        { status: 400 },
-      );
-    }
-
-    const baseMimeType = audioFile.type?.split(';')[0] ?? '';
-    if (!(ALLOWED_AUDIO_MIME_TYPES as readonly string[]).includes(baseMimeType)) {
-      return NextResponse.json(
-        {
-          message: `Formato não suportado. Use: ${ALLOWED_AUDIO_MIME_TYPES.join(', ')}`,
-        },
+        { message: 'Gravação muito curta. Segure o botão por mais tempo e fale. Solte quando terminar.' },
         { status: 400 },
       );
     }

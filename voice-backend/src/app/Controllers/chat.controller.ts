@@ -10,10 +10,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ChatService, ConversationMessage } from '../Services/chat.service';
-import {
-  MAX_AUDIO_FILE_SIZE,
-  ALLOWED_AUDIO_MIME_TYPES,
-} from '../Utils/constants';
+import { MIN_RECORDING_SIZE } from '../Utils/constants';
 
 @Controller('chat')
 export class ChatController {
@@ -26,22 +23,17 @@ export class ChatController {
     @Body('history') historyJson?: string,
   ) {
     if (!file?.buffer) {
-      throw new BadRequestException(
-        'Áudio não enviado. Envie o arquivo no campo "audio".',
-      );
+      throw new BadRequestException({
+        message: 'Nenhum áudio recebido.',
+        detail: 'Grave novamente segurando o botão e solte quando terminar.',
+      });
     }
 
-    if (file.size > MAX_AUDIO_FILE_SIZE) {
-      throw new BadRequestException(
-        `Arquivo muito grande. Máximo: ${MAX_AUDIO_FILE_SIZE / 1024 / 1024}MB`,
-      );
-    }
-
-    const baseMimeType = file.mimetype?.split(';')[0] ?? '';
-    if (!(ALLOWED_AUDIO_MIME_TYPES as readonly string[]).includes(baseMimeType)) {
-      throw new BadRequestException(
-        `Formato não suportado. Use: ${ALLOWED_AUDIO_MIME_TYPES.join(', ')}`,
-      );
+    if (file.size < MIN_RECORDING_SIZE) {
+      throw new BadRequestException({
+        message: 'Gravação muito curta.',
+        detail: 'Segure o botão por mais tempo e fale. Solte quando terminar.',
+      });
     }
 
     let history: ConversationMessage[] = [];
@@ -63,10 +55,19 @@ export class ChatController {
         message.includes('GEMINI') ||
         message.includes('API Gemini') ||
         message.includes('API OpenRouter');
-      throw new HttpException(
-        message,
-        isConfigError ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_REQUEST,
-      );
+
+      const status = isConfigError ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_REQUEST;
+      const errorResponse = isConfigError
+        ? {
+            message: 'Serviço temporariamente indisponível.',
+            detail: message,
+          }
+        : {
+            message: 'Não foi possível processar o áudio.',
+            detail: message,
+          };
+
+      throw new HttpException(errorResponse, status);
     }
   }
 }

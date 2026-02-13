@@ -22,14 +22,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     let message: string;
+    let detail: string | undefined;
     if (exception instanceof HttpException) {
       const res = exception.getResponse();
-      message =
-        typeof res === 'object' && res !== null && 'message' in res
-          ? (Array.isArray((res as { message: unknown }).message)
-              ? (res as { message: string[] }).message.join(', ')
-              : String((res as { message: string }).message))
-          : exception.message;
+      if (typeof res === 'object' && res !== null && 'message' in res) {
+        const msg = (res as { message: unknown }).message;
+        message = Array.isArray(msg) ? msg.join(', ') : String(msg);
+        detail = (res as { detail?: string }).detail;
+      } else {
+        message = exception.message;
+      }
     } else {
       message =
         exception instanceof Error
@@ -39,9 +41,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     this.logger.error(message, exception instanceof Error ? exception.stack : '');
 
-    response.status(status).json({
+    const payload: { statusCode: number; message: string; detail?: string } = {
       statusCode: status,
-      message,
-    });
+      message: detail ? `${message}. ${detail}` : message,
+    };
+    response.status(status).json(payload);
   }
 }

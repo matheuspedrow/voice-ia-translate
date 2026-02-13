@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { sendVoiceMessage } from '@/services/chat.service';
 import type { ConversationMessage } from '@/models/chat.types';
 import { MIN_RECORDING_SIZE } from '@/constants';
@@ -11,10 +11,17 @@ import { ConversationHistory } from '../conversation-history';
 import { RecordButton } from '../record-button';
 import styles from './voice-chat.module.css';
 
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
 export function VoiceChat() {
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   const {
     isRecording,
@@ -26,6 +33,18 @@ export function VoiceChat() {
   } = useAudioRecorder();
 
   const { speak, stop, state: ttsState } = useTextToSpeech();
+
+  useEffect(() => {
+    if (!isRecording) {
+      setRecordingSeconds(0);
+      return;
+    }
+    setRecordingSeconds(0);
+    const interval = setInterval(() => {
+      setRecordingSeconds((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isRecording]);
 
   const handleRecordStart = useCallback(() => {
     setError(null);
@@ -89,6 +108,11 @@ export function VoiceChat() {
             onStart={handleRecordStart}
             onStop={handleRecordStop}
           />
+          {isRecording && (
+            <span className={styles.recordingTimer} aria-live="polite">
+              {formatDuration(recordingSeconds)}
+            </span>
+          )}
           {isProcessing && (
             <span className={styles.processingLabel}>Processando...</span>
           )}
